@@ -1,6 +1,8 @@
 {
-  "name": "twitter-nearby",
+  "name": "local-tweets",
   "version": "0.0.1",
+  "author": "Josué Cau <josuecau@yahoo.fr>",
+  "description": "An interactive map showing local tweets",
   "private": true,
   "scripts": {
     "start": "NODE_ENV=development ./node_modules/.bin/nodemon server.js"
