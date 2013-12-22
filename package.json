@@ -13,7 +13,6 @@
     "twit": "1.1.11",
     "twitter-text": "~1.7.0",
     "underscore": "~1.5.2",
-    "where": "~0.1.0",
     "geopoint": "~1.0.1"
   }
 }

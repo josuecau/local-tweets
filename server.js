@@ -1,13 +1,11 @@
 
-var express       = require('express')
-    , http        = require('http')
-    , path        = require('path')
-    , io          = require('socket.io')
-    , Twit        = require('twit')
-    , twitterText = require('twitter-text')
-    , _           = require('underscore')
-    , GeoPoint    = require('geopoint')
-    , config      = require('./config')
+var express = require('express')
+var http    = require('http')
+var path    = require('path')
+var io      = require('socket.io')
+var Twit    = require('twit')
+var utils   = require('./utils')
+var config  = require('./config')
 
 var app = express()
 var httpServer = http.createServer(app)
@@ -37,26 +35,11 @@ var ioServer = io.listen(httpServer)
 
 var T = new Twit(config.twitter)
 
-var cleanupTweet = function (tweet) {
-    var t = _.pick(tweet, 'created_at', 'id_str')
-    t.text = twitterText.autoLink(tweet.text)
-    t.coordinates  = _.pick(tweet.coordinates, 'coordinates')
-    t.user = _.pick(tweet.user, 'name', 'screen_name', 'profile_image_url')
-    return t
-}
-
 ioServer.sockets.on('connection', function (socket) {
 
     socket.on('position', function (position) {
 
-        var point = new GeoPoint(position.latitude, position.longitude)
-        var bbox = point.boundingCoordinates(config.geolocation.distance, null, true)
-        var location = [
-            bbox[0].longitude(),
-            bbox[0].latitude(),
-            bbox[1].longitude(),
-            bbox[1].latitude()
-        ]
+        var location = utils.boundingBox(position)
 
         var stream = T.stream('statuses/filter', {
             locations: location
@@ -64,7 +47,7 @@ ioServer.sockets.on('connection', function (socket) {
 
         stream.on('tweet', function (tweet) {
             if (tweet.coordinates) {
-                socket.emit('tweet', cleanupTweet(tweet))
+                socket.emit('tweet', utils.cleanupTweet(tweet))
             }
         })
 
