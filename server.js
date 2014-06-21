@@ -1,4 +1,3 @@
-
 var express = require('express')
 var http    = require('http')
 var path    = require('path')
@@ -19,16 +18,16 @@ app.use(express.urlencoded())
 app.use(express.methodOverride())
 app.use(express.static(path.join(__dirname, 'public')))
 
-if ('development' == app.get('env')) {
-    app.use(express.errorHandler())
+if ('development' === app.get('env')) {
+  app.use(express.errorHandler())
 }
 
 app.get('/', function (req, res) {
-    res.render('index')
+  res.render('index')
 })
 
 httpServer.listen(app.get('port'), function() {
-    console.log('Express server listening on port ' + app.get('port'))
+  console.log('Express server listening on port ' + app.get('port'))
 })
 
 var ioServer = io.listen(httpServer)
@@ -37,25 +36,25 @@ var T = new Twit(config.twitter)
 
 ioServer.sockets.on('connection', function (socket) {
 
-    socket.on('position', function (position) {
+  socket.on('position', function (position) {
 
-        var location = utils.boundingBox(position)
+    var location = utils.boundingBox(position)
 
-        var stream = T.stream('statuses/filter', {
-            locations: location
-        })
-
-        stream.on('tweet', function (tweet) {
-            if (tweet.coordinates) {
-                socket.emit('tweet', utils.cleanupTweet(tweet))
-            }
-        })
-
-        socket.on('disconnect', function () {
-            stream.stop()             
-        })
-
+    var stream = T.stream('statuses/filter', {
+      locations: location
     })
+
+    stream.on('tweet', function (tweet) {
+      if (tweet.coordinates) {
+        socket.emit('tweet', utils.cleanupTweet(tweet))
+      }
+    })
+
+    socket.on('disconnect', function () {
+      stream.stop()
+    })
+
+  })
 
 })
 
